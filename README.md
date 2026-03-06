@@ -2,8 +2,6 @@
 
 Vaari is a premium, feature-rich e-commerce application built with Flutter and Supabase. It offers a seamless shopping experience with built-in payments, order tracking, and a hidden administrative dashboard for store management.
 
-![Vaari Home Screen](flutter_02.png)
-
 ## 🚀 Features
 
 ### **Customer Experience**
