@@ -1,54 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vaari/features/navigation/main_navigation_view.dart';
 import '../viewmodel/auth_viewmodel.dart';
-import 'signup_view.dart';
-import 'forgot_password_view.dart';
 
-class LoginView extends ConsumerStatefulWidget {
-  const LoginView({super.key});
+class ForgotPasswordView extends ConsumerStatefulWidget {
+  const ForgotPasswordView({super.key});
 
   @override
-  ConsumerState<LoginView> createState() => _LoginViewState();
+  ConsumerState<ForgotPasswordView> createState() => _ForgotPasswordViewState();
 }
 
-class _LoginViewState extends ConsumerState<LoginView> {
+class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _emailController;
-  late final TextEditingController _passwordController;
 
   @override
   void initState() {
     super.initState();
     _emailController = TextEditingController();
-    _passwordController = TextEditingController();
   }
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final authState = ref.watch(authViewModelProvider);
+
     ref.listen(authViewModelProvider, (previous, next) {
       next.whenOrNull(
         data: (user) {
-          if (user != null) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const MainNavigationView()),
-              (route) => false,
+          if (user == null && previous?.isLoading == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Password reset link sent to your email!'),
+                backgroundColor: theme.colorScheme.primary,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             );
+            Navigator.pop(context);
           }
         },
         error: (e, _) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(e.toString()),
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: theme.colorScheme.error,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -59,17 +62,21 @@ class _LoginViewState extends ConsumerState<LoginView> {
       );
     });
 
-    final authState = ref.watch(authViewModelProvider);
-    final theme = Theme.of(context);
-
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+      ),
+      extendBodyBehindAppBar: true,
       body: SingleChildScrollView(
         child: Container(
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
               colors: [
                 theme.colorScheme.primary.withValues(alpha: 0.05),
                 theme.colorScheme.secondary.withValues(alpha: 0.05),
@@ -83,7 +90,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 40),
-                  // Logo Area
+                  // Icon Area
                   Container(
                     padding: const EdgeInsets.all(22),
                     decoration: BoxDecoration(
@@ -99,19 +106,15 @@ class _LoginViewState extends ConsumerState<LoginView> {
                         ),
                       ],
                     ),
-                    child: Image.asset(
-                      'assets/images/logo.png',
-                      height: 100,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.shopping_basket_rounded,
-                        size: 80,
-                        color: theme.colorScheme.primary,
-                      ),
+                    child: Icon(
+                      Icons.lock_reset_rounded,
+                      size: 80,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                   const SizedBox(height: 32),
                   Text(
-                    'Welcome Back',
+                    'Forgot Password?',
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onSurface,
@@ -119,7 +122,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign in to continue your shopping',
+                    'Enter your email address to receive a password reset link.',
+                    textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
@@ -153,41 +157,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 16),
-                            TextFormField(
-                              controller: _passwordController,
-                              obscureText: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Password',
-                                prefixIcon: Icon(Icons.lock_outline_rounded),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Password is required';
-                                }
-                                if (value.length < 6) {
-                                  return 'Password must be at least 6 characters';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const ForgotPasswordView(),
-                                    ),
-                                  );
-                                },
-                                child: const Text('Forgot Password?'),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 32),
                             authState.isLoading
                                 ? const CircularProgressIndicator()
                                 : ElevatedButton(
@@ -197,45 +167,18 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                             .read(
                                               authViewModelProvider.notifier,
                                             )
-                                            .signIn(
+                                            .resetPassword(
                                               _emailController.text.trim(),
-                                              _passwordController.text.trim(),
                                             );
                                       }
                                     },
-                                    child: const Text('SIGN IN'),
+                                    child: const Text('SEND RESET LINK'),
                                   ),
                           ],
                         ),
                       ),
                     ),
                   ),
-
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Don't have an account? ",
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SignupView(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          'Create Account',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),

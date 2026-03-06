@@ -170,8 +170,8 @@ class CustomerReceiptService {
                       children: [
                         _buildTableCell(item.productName),
                         _buildTableCell(item.quantity.toString()),
-                        _buildTableCell('₹${item.price.toStringAsFixed(2)}'),
-                        _buildTableCell('₹${subtotal.toStringAsFixed(2)}'),
+                        _buildTableCell('Rs.${item.price.toStringAsFixed(2)}'),
+                        _buildTableCell('Rs.${subtotal.toStringAsFixed(2)}'),
                       ],
                     );
                   }).toList(),
@@ -192,7 +192,7 @@ class CustomerReceiptService {
                     ),
                   ),
                   pw.Text(
-                    '₹${totalAmount.toStringAsFixed(2)}',
+                    'Rs.${totalAmount.toStringAsFixed(2)}',
                     style: pw.TextStyle(
                       fontSize: 18,
                       fontWeight: pw.FontWeight.bold,

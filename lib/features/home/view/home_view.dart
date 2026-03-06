@@ -52,20 +52,29 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final categoryState = ref.watch(categoryViewModelProvider);
     final themeMode = ref.watch(themeProvider);
     final productState = ref.watch(productListViewModelProvider);
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vaari'),
+        title: Image.asset(
+          'assets/images/logo.png',
+          height: 40,
+          errorBuilder: (context, error, stackTrace) => const Text('Vaari'),
+        ),
         centerTitle: true,
         actions: [
           IconButton(
             onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
             icon: Icon(
-              themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+              themeMode == ThemeMode.dark
+                  ? Icons.light_mode_rounded
+                  : Icons.dark_mode_rounded,
             ),
             tooltip: 'Toggle theme',
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: CustomScrollView(
@@ -149,18 +158,49 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           );
                         },
                         child: Card(
-                          elevation: 1,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(getCategoryIcon(category.icon), size: 42),
-                              const SizedBox(height: 10),
-                              Text(
-                                category.name,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.titleMedium,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  colorScheme.primary.withValues(
+                                    alpha: isDark ? 0.3 : 0.05,
+                                  ),
+                                  colorScheme.secondary.withValues(
+                                    alpha: isDark ? 0.3 : 0.05,
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primary.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    getCategoryIcon(category.icon),
+                                    size: 32,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  category.name,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );

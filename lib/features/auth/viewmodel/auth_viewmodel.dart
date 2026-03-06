@@ -79,4 +79,14 @@ class AuthViewModel extends StateNotifier<AsyncValue<AppUser?>> {
       state = AsyncValue.error(e, st);
     }
   }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      state = const AsyncValue.loading();
+      await _client.auth.resetPasswordForEmail(email);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
 }
