@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vaari/core/constants/app_colors.dart';
 import '../viewmodel/auth_viewmodel.dart';
 
 class ForgotPasswordView extends ConsumerStatefulWidget {
@@ -63,125 +64,96 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
     });
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
         ),
       ),
-      extendBodyBehindAppBar: true,
       body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-              colors: [
-                theme.colorScheme.primary.withValues(alpha: 0.05),
-                theme.colorScheme.secondary.withValues(alpha: 0.05),
-              ],
-            ),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 40),
-                  // Icon Area
-                  Container(
-                    padding: const EdgeInsets.all(22),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: 0.1,
-                          ),
-                          blurRadius: 20,
-                          spreadRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.lock_reset_rounded,
-                      size: 80,
-                      color: theme.colorScheme.primary,
-                    ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+              // Icon Area
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.lightGray,
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Forgot Password?',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                    ),
+                  child: Icon(
+                    Icons.lock_reset_outlined,
+                    size: 40,
+                    color: AppColors.primaryBlack,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Enter your email address to receive a password reset link.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  const SizedBox(height: 48),
-
-                  // Form Area
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: const InputDecoration(
-                                labelText: 'Email Address',
-                                prefixIcon: Icon(Icons.email_outlined),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Email is required';
-                                }
-                                if (!RegExp(
-                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                                ).hasMatch(value)) {
-                                  return 'Enter a valid email address';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 32),
-                            authState.isLoading
-                                ? const CircularProgressIndicator()
-                                : ElevatedButton(
-                                    onPressed: () {
-                                      if (_formKey.currentState!.validate()) {
-                                        ref
-                                            .read(
-                                              authViewModelProvider.notifier,
-                                            )
-                                            .resetPassword(
-                                              _emailController.text.trim(),
-                                            );
-                                      }
-                                    },
-                                    child: const Text('SEND RESET LINK'),
-                                  ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+              const SizedBox(height: 48),
+              Text(
+                'Reset Password',
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primaryBlack,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Enter your email address and we will send you a link to reset your password.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey.shade600,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 48),
+
+              // Form Area
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        hintText: 'Email Address',
+                        prefixIcon: Icon(Icons.email_outlined, size: 20),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Email is required';
+                        }
+                        if (!RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        ).hasMatch(value)) {
+                          return 'Enter a valid email address';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 48),
+                    authState.isLoading
+                        ? const CircularProgressIndicator()
+                        : ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                ref
+                                    .read(authViewModelProvider.notifier)
+                                    .resetPassword(
+                                      _emailController.text.trim(),
+                                    );
+                              }
+                            },
+                            child: const Text('Send Reset Link'),
+                          ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

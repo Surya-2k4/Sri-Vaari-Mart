@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vaari/features/navigation/main_navigation_view.dart';
+import 'package:vaari/core/constants/app_colors.dart';
 import '../viewmodel/auth_viewmodel.dart';
 import 'signup_view.dart';
 import 'forgot_password_view.dart';
@@ -63,182 +64,163 @@ class _LoginViewState extends ConsumerState<LoginView> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+        ),
+      ),
       body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                theme.colorScheme.primary.withValues(alpha: 0.05),
-                theme.colorScheme.secondary.withValues(alpha: 0.05),
-              ],
-            ),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 40),
-                  // Logo Area
-                  Container(
-                    padding: const EdgeInsets.all(22),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: 0.1,
-                          ),
-                          blurRadius: 20,
-                          spreadRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Image.asset(
-                      'assets/images/logo.png',
-                      height: 100,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.shopping_basket_rounded,
-                        size: 80,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+              // Logo Area
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.lightGray,
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Welcome Back',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                    ),
+                  child: Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 40,
+                    color: AppColors.primaryBlack,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Sign in to continue your shopping',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  const SizedBox(height: 48),
+                ),
+              ),
+              const SizedBox(height: 48),
+              Text(
+                'Welcome Back',
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primaryBlack,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Let\'s get you signed in and start shopping for your favorites.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey.shade600,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 48),
 
-                  // Form Area
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: const InputDecoration(
-                                labelText: 'Email Address',
-                                prefixIcon: Icon(Icons.email_outlined),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Email is required';
-                                }
-                                if (!RegExp(
-                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                                ).hasMatch(value)) {
-                                  return 'Enter a valid email address';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            TextFormField(
-                              controller: _passwordController,
-                              obscureText: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Password',
-                                prefixIcon: Icon(Icons.lock_outline_rounded),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Password is required';
-                                }
-                                if (value.length < 6) {
-                                  return 'Password must be at least 6 characters';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const ForgotPasswordView(),
-                                    ),
-                                  );
-                                },
-                                child: const Text('Forgot Password?'),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            authState.isLoading
-                                ? const CircularProgressIndicator()
-                                : ElevatedButton(
-                                    onPressed: () {
-                                      if (_formKey.currentState!.validate()) {
-                                        ref
-                                            .read(
-                                              authViewModelProvider.notifier,
-                                            )
-                                            .signIn(
-                                              _emailController.text.trim(),
-                                              _passwordController.text.trim(),
-                                            );
-                                      }
-                                    },
-                                    child: const Text('SIGN IN'),
-                                  ),
-                          ],
-                        ),
+              // Form Area
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        hintText: 'Email Address',
+                        prefixIcon: Icon(Icons.email_outlined, size: 20),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Email is required';
+                        }
+                        if (!RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        ).hasMatch(value)) {
+                          return 'Enter a valid email address';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Don't have an account? ",
-                        style: theme.textTheme.bodyMedium,
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        hintText: 'Password',
+                        prefixIcon: Icon(Icons.lock_outline_rounded, size: 20),
                       ),
-                      TextButton(
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Password is required';
+                        }
+                        if (value.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const SignupView(),
+                              builder: (_) => const ForgotPasswordView(),
                             ),
                           );
                         },
-                        child: const Text(
-                          'Create Account',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        child: Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ],
+                    ),
+                    const SizedBox(height: 32),
+                    authState.isLoading
+                        ? const CircularProgressIndicator()
+                        : ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                ref
+                                    .read(authViewModelProvider.notifier)
+                                    .signIn(
+                                      _emailController.text.trim(),
+                                      _passwordController.text.trim(),
+                                    );
+                              }
+                            },
+                            child: const Text('Login'),
+                          ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Don't have an account? ",
+                    style: TextStyle(color: Colors.grey.shade600),
                   ),
-                  const SizedBox(height: 24),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SignupView()),
+                      );
+                    },
+                    child: const Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
+              const SizedBox(height: 32),
+            ],
           ),
         ),
       ),

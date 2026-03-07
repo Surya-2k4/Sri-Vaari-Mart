@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/order_history_viewmodel.dart';
 import '../../../core/services/customer_receipt_service.dart';
+import '../../navigation/navigation_provider.dart';
 
 class OrderHistoryView extends ConsumerWidget {
   const OrderHistoryView({super.key});
@@ -35,7 +36,49 @@ class OrderHistoryView extends ConsumerWidget {
         error: (e, _) => Center(child: Text(e.toString())),
         data: (orders) {
           if (orders.isEmpty) {
-            return const Center(child: Text('No orders yet'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 80,
+                    color: Colors.grey.shade300,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No orders yet',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Your order history will appear here',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: 200, // Restricted button size
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Navigate to Home tab
+                        ref.read(navigationIndexProvider.notifier).state = 0;
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Start Shopping'),
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
 
           return ListView.separated(

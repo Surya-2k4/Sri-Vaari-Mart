@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,9 +17,15 @@ class ProductDetailView extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
+  int _currentPage = 0;
+  late final PageController _pageController;
+  Timer? _timer; // Corrected from java.util.Timer to dart:async.Timer
+
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: 0);
+
     Future.microtask(() {
       ref
           .read(productDetailViewModelProvider.notifier)
@@ -26,59 +33,156 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
     });
   }
 
+  void _startAutoScroll(int count) {
+    if (count <= 1) return;
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_currentPage < count - 1) {
+        _currentPage++;
+      } else {
+        _currentPage = 0;
+      }
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(
+          _currentPage,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOutQuart,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _timer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(productDetailViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Product')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Product Details'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: Colors.black,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+        ),
+      ),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text(e.toString())),
         data: (product) {
           final theme = Theme.of(context);
+
+          // Start timer only once when data is loaded
+          if (_timer == null && product.images.length > 1) {
+            // Changed condition to check _timer == null
+            // We use a small delay to avoid starting during build
+            Future.delayed(Duration.zero, () {
+              if (mounted && _timer == null) {
+                _startAutoScroll(product.images.length);
+              }
+            });
+          }
+
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Image.network(
-                        product.imageUrl,
-                        height: 300,
+                  Stack(
+                    children: [
+                      Container(
+                        height: 400,
                         width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          height: 300,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(32),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.12),
+                              blurRadius: 40,
+                              offset: const Offset(0, 20),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(32),
+                          child: PageView.builder(
+                            controller: _pageController,
+                            itemCount: product.images.length,
+                            onPageChanged: (index) {
+                              setState(() => _currentPage = index);
+                            },
+                            itemBuilder: (context, index) {
+                              return Image.network(
+                                product.images[index],
+                                fit: BoxFit.cover,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        color: Colors.grey.shade50,
+                                        child: const Center(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: Colors.grey.shade100,
+                                  child: const Icon(
+                                    Icons.image_not_supported_outlined,
+                                    size: 50,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                          child: Icon(
-                            Icons.shopping_bag_outlined,
-                            size: 80,
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.5,
+                        ),
+                      ),
+                      // Page Indicator Overlay
+                      Positioned(
+                        bottom: 30,
+                        left: 0,
+                        right: 0,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            product.images.length,
+                            (index) => AnimatedContainer(
+                              duration: const Duration(milliseconds: 400),
+                              margin: const EdgeInsets.symmetric(horizontal: 5),
+                              width: index == _currentPage ? 28 : 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(6),
+                                color: index == _currentPage
+                                    ? Colors.white
+                                    : Colors.white.withValues(alpha: 0.4),
+                                boxShadow: [
+                                  if (index == _currentPage)
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                      blurRadius: 10,
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                   const SizedBox(height: 24),
                   Row(

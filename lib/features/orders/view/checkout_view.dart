@@ -47,9 +47,12 @@ class _CheckoutViewState extends ConsumerState<CheckoutView> {
     try {
       final cartItems = ref.read(cartViewModelProvider).value ?? [];
 
+      if (!mounted) return;
+
       await ref
           .read(checkoutViewModelProvider.notifier)
           .placeOrder(
+            context: context,
             items: cartItems,
             paymentMethod: 'Razorpay',
             address: _addressController.text.trim(),
@@ -108,6 +111,7 @@ class _CheckoutViewState extends ConsumerState<CheckoutView> {
       await ref
           .read(checkoutViewModelProvider.notifier)
           .placeOrder(
+            context: context,
             items: cartItems,
             paymentMethod: 'COD',
             address: _addressController.text.trim(),

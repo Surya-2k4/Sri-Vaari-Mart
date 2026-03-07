@@ -1,20 +1,24 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../cart/model/cart_item_model.dart';
+import '../../../core/services/notification_service.dart';
 
 final checkoutViewModelProvider =
     StateNotifierProvider<CheckoutViewModel, AsyncValue<void>>(
-      (ref) => CheckoutViewModel(),
+      (ref) => CheckoutViewModel(ref),
     );
 
 class CheckoutViewModel extends StateNotifier<AsyncValue<void>> {
-  CheckoutViewModel() : super(const AsyncValue.data(null));
+  final Ref _ref;
+  CheckoutViewModel(this._ref) : super(const AsyncValue.data(null));
 
   final SupabaseClient _client = Supabase.instance.client;
 
   /// Creates order + order_items and clears cart
   Future<void> placeOrder({
+    required BuildContext context,
     required List<CartItemModel> items,
     required String paymentMethod,
     required String address,
@@ -87,6 +91,11 @@ class CheckoutViewModel extends StateNotifier<AsyncValue<void>> {
       await _client.from('cart_items').delete().eq('user_id', user.id);
       print('✅ Cart cleared');
 
+      // 4️⃣ Notify user
+      _ref
+          .read(notificationServiceProvider)
+          .notifyOrderPlaced(context, order, orderItems);
+
       state = const AsyncValue.data(null);
     } catch (e, st) {
       print('❌ Order placement error: $e');
@@ -97,11 +106,13 @@ class CheckoutViewModel extends StateNotifier<AsyncValue<void>> {
   }
 
   Future<void> placeOrderAfterPayment({
+    required BuildContext context,
     required List<CartItemModel> items,
     required String address,
     required String phone,
   }) async {
     return placeOrder(
+      context: context,
       items: items,
       paymentMethod: 'Razorpay',
       address: address,
