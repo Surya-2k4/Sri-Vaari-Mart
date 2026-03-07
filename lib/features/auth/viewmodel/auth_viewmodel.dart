@@ -80,6 +80,19 @@ class AuthViewModel extends StateNotifier<AsyncValue<AppUser?>> {
     }
   }
 
+  Future<void> signInWithGoogle() async {
+    try {
+      state = const AsyncValue.loading();
+      await _client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo:
+            'http://localhost:3000', // Update this for your production URL
+      );
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
   Future<void> resetPassword(String email) async {
     try {
       state = const AsyncValue.loading();
