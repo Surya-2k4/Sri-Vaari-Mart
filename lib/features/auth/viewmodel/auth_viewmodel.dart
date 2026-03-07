@@ -86,7 +86,7 @@ class AuthViewModel extends StateNotifier<AsyncValue<AppUser?>> {
       await _client.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo:
-            'http://localhost:3000', // Update this for your production URL
+            'http://localhost:49435', // Update this for your production URL
       );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
