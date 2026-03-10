@@ -71,12 +71,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 60),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.chevron_left, size: 28),
-                        padding: EdgeInsets.zero,
-                        alignment: Alignment.centerLeft,
-                      ),
+
                       const Spacer(),
                       const Text(
                         'Create Your Account',
