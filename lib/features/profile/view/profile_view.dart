@@ -74,122 +74,130 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
             );
           }
 
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                // Avatar with Edit icon
-                Center(
-                  child: Stack(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.primaryBlack.withOpacity(0.1),
-                            width: 1,
-                          ),
-                        ),
-                        child: CircleAvatar(
-                          radius: 56,
-                          backgroundColor: AppColors.primaryBlack.withOpacity(
-                            0.05,
-                          ),
-                          child: Text(
-                            _getInitials(profile.fullName ?? 'U'),
-                            style: const TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryBlack,
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    // Avatar with Edit icon
+                    Center(
+                      child: Stack(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.primaryBlack.withOpacity(0.1),
+                                width: 1,
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              radius: 56,
+                              backgroundColor: AppColors.primaryBlack
+                                  .withOpacity(0.05),
+                              child: Text(
+                                _getInitials(profile.fullName ?? 'U'),
+                                style: const TextStyle(
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primaryBlack,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: AppColors.primaryBlack,
-                            shape: BoxShape.circle,
+                          Positioned(
+                            bottom: 0,
+                            right: 4,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: AppColors.primaryBlack,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                            size: 14,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  profile.fullName ?? 'User Name',
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Text(
-                  'Buyer',
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-                const SizedBox(height: 32),
-
-                // Menu Items
-                _buildMenuItem(
-                  context,
-                  icon: Icons.person_outline,
-                  title: 'Edit Profile',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const EditProfileView()),
-                  ),
-                ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.notifications_none_rounded,
-                  title: 'Notification',
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const NotificationView()),
-                  ),
-                ),
-
-                const SizedBox(height: 48),
-
-                // Sign Out Button
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _handleLogout(context, ref),
-                      icon: const Icon(Icons.logout, color: Colors.white),
-                      label: const Text(
-                        'Sign Out',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlack,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
+                        ],
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    Text(
+                      profile.fullName ?? 'User Name',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Text(
+                      'Buyer',
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Menu Items
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.person_outline,
+                      title: 'Edit Profile',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const EditProfileView(),
+                        ),
+                      ),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.notifications_none_rounded,
+                      title: 'Notification',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationView(),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 48),
+
+                    // Sign Out Button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton.icon(
+                          onPressed: () => _handleLogout(context, ref),
+                          icon: const Icon(Icons.logout, color: Colors.white),
+                          label: const Text(
+                            'Sign Out',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryBlack,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
-                const SizedBox(height: 24),
-              ],
+              ),
             ),
           );
         },
