@@ -7,7 +7,7 @@ FLUTTER_VERSION="latest"
 # 1. Install Flutter if not already present
 if [ ! -d "flutter" ]; then
   echo "Installing Flutter..."
-  git clone https://github.com/flutter/flutter.git -b $FLUTTER_CHANNEL
+  git clone https://github.com/flutter/flutter.git -b $FLUTTER_CHANNEL --depth 1
 fi
 
 # 2. Setup Flutter path
