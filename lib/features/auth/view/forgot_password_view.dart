@@ -71,89 +71,94 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              // Icon Area
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.lightGray,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.lock_reset_outlined,
-                    size: 40,
-                    color: AppColors.primaryBlack,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 48),
-              Text(
-                'Reset Password',
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.primaryBlack,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Enter your email address and we will send you a link to reset your password.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade600,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 48),
-
-              // Form Area
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        hintText: 'Email Address',
-                        prefixIcon: Icon(Icons.email_outlined, size: 20),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 40),
+                  // Icon Area
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.lightGray,
+                        shape: BoxShape.circle,
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Email is required';
-                        }
-                        if (!RegExp(
-                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                        ).hasMatch(value)) {
-                          return 'Enter a valid email address';
-                        }
-                        return null;
-                      },
+                      child: Icon(
+                        Icons.lock_reset_outlined,
+                        size: 40,
+                        color: AppColors.primaryBlack,
+                      ),
                     ),
-                    const SizedBox(height: 48),
-                    authState.isLoading
-                        ? const CircularProgressIndicator()
-                        : ElevatedButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                ref
-                                    .read(authViewModelProvider.notifier)
-                                    .resetPassword(
-                                      _emailController.text.trim(),
-                                    );
-                              }
-                            },
-                            child: const Text('Send Reset Link'),
+                  ),
+                  const SizedBox(height: 48),
+                  Text(
+                    'Reset Password',
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primaryBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Enter your email address and we will send you a link to reset your password.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey.shade600,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+
+                  // Form Area
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: const InputDecoration(
+                            hintText: 'Email Address',
+                            prefixIcon: Icon(Icons.email_outlined, size: 20),
                           ),
-                  ],
-                ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Email is required';
+                            }
+                            if (!RegExp(
+                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                            ).hasMatch(value)) {
+                              return 'Enter a valid email address';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 48),
+                        authState.isLoading
+                            ? const CircularProgressIndicator()
+                            : ElevatedButton(
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    ref
+                                        .read(authViewModelProvider.notifier)
+                                        .resetPassword(
+                                          _emailController.text.trim(),
+                                        );
+                                  }
+                                },
+                                child: const Text('Send Reset Link'),
+                              ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

@@ -24,14 +24,25 @@ class ProductModel {
         data['image_url'] ??
         'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000&auto=format&fit=crop';
 
-    // Generating 3 images for the slideshow as requested
-    // In a real app, these would come from a database field like 'images_list'
-    final List<String> imagesList = [
-      mainImage,
-      // Adding relevant variations or high-quality product placeholders
-      'https://images.unsplash.com/photo-1543168252-418658e7d361?q=80&w=1000&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?q=80&w=1000&auto=format&fit=crop',
-    ];
+    // Build slideshow images from the 'images' column (text[] array in DB).
+    // Falls back to main image if the column is missing or empty.
+    List<String> imagesList = [];
+
+    if (data['images'] != null &&
+        data['images'] is List &&
+        (data['images'] as List).isNotEmpty) {
+      imagesList = (data['images'] as List).map((e) => e.toString()).toList();
+    }
+
+    // If no images array from DB, use the main image for the slideshow
+    if (imagesList.isEmpty) {
+      imagesList = [mainImage];
+    }
+
+    // Ensure the main image is always the first in the list
+    if (imagesList.isNotEmpty && imagesList[0] != mainImage) {
+      imagesList.insert(0, mainImage);
+    }
 
     return ProductModel(
       id: data['id'],

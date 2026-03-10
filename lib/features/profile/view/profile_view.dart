@@ -18,6 +18,16 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   int _adminTapCount = 0;
   DateTime? _lastTapTime;
 
+  String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
+      return parts[0][0].toUpperCase();
+    }
+    return 'U';
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileState = ref.watch(profileViewModelProvider);
@@ -81,10 +91,18 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                             width: 1,
                           ),
                         ),
-                        child: const CircleAvatar(
+                        child: CircleAvatar(
                           radius: 56,
-                          backgroundImage: NetworkImage(
-                            'https://i.pravatar.cc/150?u=vaari_user',
+                          backgroundColor: AppColors.primaryBlack.withOpacity(
+                            0.05,
+                          ),
+                          child: Text(
+                            _getInitials(profile.fullName ?? 'U'),
+                            style: const TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryBlack,
+                            ),
                           ),
                         ),
                       ),
