@@ -15,6 +15,10 @@ class _SignupViewState extends ConsumerState<SignupView> {
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
+  late final TextEditingController _confirmPasswordController;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
 
   @override
   void initState() {
@@ -22,6 +26,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
     _nameController = TextEditingController();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
   }
 
   @override
@@ -29,6 +34,8 @@ class _SignupViewState extends ConsumerState<SignupView> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
+
     super.dispose();
   }
 
@@ -141,20 +148,70 @@ class _SignupViewState extends ConsumerState<SignupView> {
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _passwordController,
-                              obscureText: true,
-                              decoration: const InputDecoration(
+                              obscureText: _obscurePassword,
+                              decoration: InputDecoration(
                                 hintText: 'Enter password',
-                                suffixIcon: Icon(
-                                  Icons.visibility_outlined,
-                                  size: 20,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    size: 20,
+                                  ),
+
+
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
                                 ),
                               ),
                               validator: (value) {
-                                if (value == null || value.isEmpty)
+                                if (value == null || value.isEmpty) {
                                   return 'Password is required';
+                                }
+                                if (value.length < 6) {
+                                  return 'Password must be at least 6 characters';
+                                }
                                 return null;
                               },
                             ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _confirmPasswordController,
+                              obscureText: _obscureConfirmPassword,
+                              decoration: InputDecoration(
+                                hintText: 'Re-enter password',
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureConfirmPassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    size: 20,
+                                  ),
+
+
+
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureConfirmPassword =
+                                          !_obscureConfirmPassword;
+                                    });
+                                  },
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please confirm your password';
+                                }
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match';
+                                }
+                                return null;
+                              },
+                            ),
+
                             Align(
                               alignment: Alignment.centerRight,
                               child: TextButton(

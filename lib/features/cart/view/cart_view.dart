@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vaari/features/orders/view/checkout_view.dart';
+
 import '../viewmodel/cart_viewmodel.dart';
 import '../../../core/utils/responsive.dart';
+import 'package:vaari/features/navigation/navigation_provider.dart';
 
 class CartView extends ConsumerWidget {
   const CartView({super.key});
@@ -34,7 +36,7 @@ class CartView extends ConsumerWidget {
         ),
         data: (items) {
           if (items.isEmpty) {
-            return _buildEmptyCart(context, theme, colorScheme);
+            return _buildEmptyCart(context, ref, theme, colorScheme);
           }
 
           final total = ref
@@ -92,6 +94,7 @@ class CartView extends ConsumerWidget {
 
   Widget _buildEmptyCart(
     BuildContext context,
+    WidgetRef ref,
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
@@ -111,13 +114,15 @@ class CartView extends ConsumerWidget {
               color: colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 24, width: 24),
           ElevatedButton(
             onPressed: () {
-              // Navigation is usually handled by switching the index in MainNavigationView
+              // Navigate to Home tab (index 0)
+              ref.read(navigationIndexProvider.notifier).state = 0;
             },
+
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 22),
             ),
             child: const Text('START SHOPPING'),
           ),

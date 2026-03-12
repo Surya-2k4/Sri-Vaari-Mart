@@ -12,6 +12,8 @@ import '../../notifications/viewmodel/notification_viewmodel.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/responsive.dart';
 import '../../ai_assistant/view/ai_chat_view.dart';
+import '../../profile/viewmodel/wishlist_viewmodel.dart';
+
 
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
@@ -31,8 +33,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(notificationServiceProvider).init(context);
+        // Ensure products are loaded initially for the "All" category
+        ref.read(productListViewModelProvider.notifier).loadProducts();
       }
     });
+
   }
 
   @override
@@ -431,6 +436,42 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 child: const Icon(Icons.check, color: Colors.white, size: 12),
               ),
             ),
+
+            // Wishlist Heart Icon
+            Positioned(
+              top: 12,
+              left: 48, // Adjusted to be next to the check badge
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final isWishlisted = ref.watch(wishlistProvider).contains(product.id);
+                  return GestureDetector(
+                    onTap: () {
+                      ref.read(wishlistProvider.notifier).toggleWishlist(product.id);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        isWishlisted ? Icons.favorite : Icons.favorite_border,
+                        color: isWishlisted ? Colors.red : Colors.grey,
+                        size: 16,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
 
             Positioned(
               top: 12,

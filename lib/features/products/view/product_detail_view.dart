@@ -6,7 +6,9 @@ import '../../auth/view/login_view.dart';
 import '../../cart/view/cart_view.dart';
 import '../../cart/viewmodel/cart_viewmodel.dart';
 import '../viewmodel/product_detail_viewmodel.dart';
+import '../../profile/viewmodel/wishlist_viewmodel.dart';
 import '../../../core/utils/responsive.dart';
+
 
 class ProductDetailView extends ConsumerStatefulWidget {
   final String productId;
@@ -74,7 +76,28 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
         ),
+        actions: [
+          Consumer(
+            builder: (context, ref, _) {
+              final isWishlisted =
+                  ref.watch(wishlistProvider).contains(widget.productId);
+              return IconButton(
+                icon: Icon(
+                  isWishlisted ? Icons.favorite : Icons.favorite_border,
+                  color: isWishlisted ? Colors.red : Colors.black,
+                ),
+                onPressed: () {
+                  ref
+                      .read(wishlistProvider.notifier)
+                      .toggleWishlist(widget.productId);
+                },
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
+
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text(e.toString())),

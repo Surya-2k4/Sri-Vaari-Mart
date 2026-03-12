@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../home/viewmodel/category_viewmodel.dart';
 import '../viewmodel/product_list_viewmodel.dart';
+import '../../profile/viewmodel/wishlist_viewmodel.dart';
 import 'product_detail_view.dart';
+
 
 class ProductListView extends ConsumerStatefulWidget {
   final String? categoryId;
@@ -251,9 +253,27 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                           ),
                         ),
                       ),
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final isWishlisted =
+                              ref.watch(wishlistProvider).contains(product.id);
+                          return IconButton(
+                            icon: Icon(
+                              isWishlisted ? Icons.favorite : Icons.favorite_border,
+                              color: isWishlisted ? Colors.red : Colors.grey,
+                            ),
+                            onPressed: () {
+                              ref
+                                  .read(wishlistProvider.notifier)
+                                  .toggleWishlist(product.id);
+                            },
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
+
               );
             },
           );

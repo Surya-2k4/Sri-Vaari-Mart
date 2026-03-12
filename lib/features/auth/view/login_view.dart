@@ -17,6 +17,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
   bool _rememberMe = false;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -139,15 +140,26 @@ class _LoginViewState extends ConsumerState<LoginView> {
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _passwordController,
-                              obscureText: true,
-                              decoration: const InputDecoration(
+                              obscureText: _obscurePassword,
+                              decoration: InputDecoration(
                                 hintText: 'Password',
                                 prefixIcon: null,
-                                suffixIcon: Icon(
-                                  Icons.visibility_outlined,
-                                  size: 20,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    size: 20,
+                                  ),
+
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
                                 ),
                               ),
+
                               validator: (value) {
                                 if (value == null || value.isEmpty)
                                   return 'Password is required';

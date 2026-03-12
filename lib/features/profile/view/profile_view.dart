@@ -4,7 +4,9 @@ import '../../admin/view/admin_login_view.dart';
 import '../../auth/view/login_view.dart';
 import '../viewmodel/profile_viewmodel.dart';
 import 'edit_profile_view.dart';
+import 'wishlist_view.dart';
 import '../../notifications/view/notification_view.dart';
+
 import '../../../core/constants/app_colors.dart';
 
 class ProfileView extends ConsumerStatefulWidget {
@@ -164,6 +166,18 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         ),
                       ),
                     ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.favorite_border_rounded,
+                      title: 'Wishlist',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const WishlistView(),
+                        ),
+                      ),
+                    ),
+
 
                     const SizedBox(height: 48),
 

@@ -10,7 +10,9 @@ final productListViewModelProvider =
 
 class ProductListViewModel
     extends StateNotifier<AsyncValue<List<ProductModel>>> {
-  ProductListViewModel() : super(const AsyncValue.loading());
+  ProductListViewModel() : super(const AsyncValue.loading()) {
+    loadProducts();
+  }
 
   final SupabaseClient _client = Supabase.instance.client;
   static const int _pageSize = 10;
