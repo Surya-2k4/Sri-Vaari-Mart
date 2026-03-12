@@ -9,8 +9,14 @@ void main() async {
   usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Load .env file (primarily for local development)
   try {
     await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint("Warning: .env file not found. AI features may need --dart-define environment variables.");
+  }
+
+  try {
     await SupabaseService.initialize();
     runApp(const ProviderScope(child: MyApp()));
   } catch (e) {

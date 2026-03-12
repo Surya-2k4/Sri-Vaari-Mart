@@ -18,7 +18,7 @@ flutter --version
 
 # 4. Build the web app
 echo "Building Flutter Web Application..."
-flutter build web --release --base-href /
+flutter build web --release --base-href / --dart-define=GROQ_API_KEY=$GROQ_API_KEY
 
 # 5. Done
 echo "Build complete."
