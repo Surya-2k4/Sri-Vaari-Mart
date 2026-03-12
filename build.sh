@@ -16,6 +16,12 @@ export PATH="$PATH:`pwd`/flutter/bin"
 # 3. Verify installation
 flutter --version
 
+# 3.5 Create empty .env if missing (required for pubspec.yaml asset)
+if [ ! -f ".env" ]; then
+  echo "Creating dummy .env file..."
+  touch .env
+fi
+
 # 4. Build the web app
 echo "Building Flutter Web Application..."
 flutter build web --release --base-href / --dart-define=GROQ_API_KEY=$GROQ_API_KEY
