@@ -11,6 +11,7 @@ import '../../notifications/view/notification_view.dart';
 import '../../notifications/viewmodel/notification_viewmodel.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/responsive.dart';
+import '../../ai_assistant/view/ai_chat_view.dart';
 
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
@@ -322,6 +323,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
             ),
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AiChatView()),
+          );
+        },
+        backgroundColor: AppColors.primaryBlack,
+        child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
       ),
     );
   }
