@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vaari/features/navigation/navigation_provider.dart';
 import '../viewmodel/wishlist_viewmodel.dart';
 import '../../products/view/product_detail_view.dart';
 import '../../../core/constants/app_colors.dart';
@@ -44,17 +45,22 @@ class WishlistView extends ConsumerWidget {
                         color: Colors.grey.shade600,
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlack,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 12,
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: 200, // Restricted button size
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Navigate to Home tab
+                          ref.read(navigationIndexProvider.notifier).state = 0;
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
+                        child: const Text('Go Shopping'),
                       ),
-                      child: const Text('Go Shopping'),
                     ),
                   ],
                 ),
@@ -62,7 +68,8 @@ class WishlistView extends ConsumerWidget {
             : ListView.separated(
                 padding: const EdgeInsets.all(24),
                 itemCount: wishlistProducts.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 16),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 16),
                 itemBuilder: (context, index) {
                   final product = wishlistProducts[index];
                   return InkWell(
@@ -140,6 +147,5 @@ class WishlistView extends ConsumerWidget {
               ),
       ),
     );
-
   }
 }

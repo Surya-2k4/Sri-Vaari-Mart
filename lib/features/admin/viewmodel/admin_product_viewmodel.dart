@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -33,12 +34,30 @@ class AdminProductViewModel
     }
   }
 
+  Future<String?> uploadProductImage(File imageFile) async {
+    try {
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final storageResponse = await _client.storage
+          .from('products')
+          .upload(fileName, imageFile);
+
+      if (storageResponse.isEmpty) return null;
+
+      final imageUrl = _client.storage.from('products').getPublicUrl(fileName);
+      return imageUrl;
+    } catch (e) {
+      print('❌ Error uploading image: $e');
+      return null;
+    }
+  }
+
   Future<void> addProduct(AdminProductModel product) async {
     try {
       print('📦 Adding product: ${product.name}');
       print('   Data: ${product.toMap()}');
 
       await _client.from('products').insert(product.toMap());
+      await _broadcastProductNotification(product, isNew: true);
 
       print('✅ Product added successfully');
       await loadProducts();
@@ -60,6 +79,7 @@ class AdminProductViewModel
           .from('products')
           .update(product.toMap())
           .eq('id', product.id!);
+      await _broadcastProductNotification(product, isNew: false);
       await loadProducts();
     } catch (e) {
       print('❌ Error updating product: $e');
@@ -100,6 +120,43 @@ class AdminProductViewModel
     } catch (e) {
       print('❌ Error updating price: $e');
       rethrow;
+    }
+  }
+
+  Future<void> _broadcastProductNotification(
+    AdminProductModel product, {
+    required bool isNew,
+  }) async {
+    try {
+      final title = isNew ? 'New Product Added!' : 'Product Updated';
+      final body =
+          isNew
+              ? '${product.name} is now available in ${product.type} category. Check it out!'
+              : 'Details for ${product.name} have been updated. Take a look!';
+
+      // Fetch all user IDs from profiles table
+      final profilesResponse = await _client.from('profiles').select('id');
+      final List<dynamic> profiles = profilesResponse as List;
+
+      if (profiles.isEmpty) return;
+
+      final notifications =
+          profiles.map((p) {
+            return {
+              'user_id': p['id'],
+              'title': title,
+              'body': body,
+              'created_at': DateTime.now().toIso8601String(),
+              'is_read': false,
+            };
+          }).toList();
+
+      // Batch insert notifications
+      await _client.from('notifications').insert(notifications);
+      print('📢 Broadcast notifications sent to ${profiles.length} users');
+    } catch (e) {
+      print('⚠️ Error broadcasting notifications: $e');
+      // Don't rethrow as this is secondary to the product update itself
     }
   }
 }

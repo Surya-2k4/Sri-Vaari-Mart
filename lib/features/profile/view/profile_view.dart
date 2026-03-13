@@ -6,6 +6,8 @@ import '../viewmodel/profile_viewmodel.dart';
 import 'edit_profile_view.dart';
 import 'wishlist_view.dart';
 import '../../notifications/view/notification_view.dart';
+import '../../notifications/viewmodel/notification_viewmodel.dart';
+import '../viewmodel/wishlist_viewmodel.dart';
 
 import '../../../core/constants/app_colors.dart';
 
@@ -61,15 +63,24 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text('Please sign in to view your profile.'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginView()),
-                      );
-                    },
-                    child: const Text('Sign in'),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: 200, // Restricted button size
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const LoginView()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Sign in'),
+                    ),
                   ),
                 ],
               ),
@@ -110,22 +121,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                               ),
                             ),
                           ),
-                          Positioned(
-                            bottom: 0,
-                            right: 4,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: AppColors.primaryBlack,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.edit,
-                                color: Colors.white,
-                                size: 14,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -159,6 +154,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       context,
                       icon: Icons.notifications_none_rounded,
                       title: 'Notification',
+                      badgeCount: ref.watch(unreadNotificationCountProvider),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -170,14 +166,12 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       context,
                       icon: Icons.favorite_border_rounded,
                       title: 'Wishlist',
+                      badgeCount: ref.watch(wishlistProvider).length,
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const WishlistView(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const WishlistView()),
                       ),
                     ),
-
 
                     const SizedBox(height: 48),
 
@@ -224,6 +218,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    int badgeCount = 0,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -250,6 +245,24 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              if (badgeCount > 0) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '$badgeCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
               const Spacer(),
               const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
             ],

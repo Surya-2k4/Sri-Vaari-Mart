@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +14,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/responsive.dart';
 import '../../ai_assistant/view/ai_chat_view.dart';
 import '../../profile/viewmodel/wishlist_viewmodel.dart';
-
+import '../../profile/view/edit_profile_view.dart';
 
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
@@ -22,9 +23,27 @@ class HomeView extends ConsumerStatefulWidget {
   ConsumerState<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends ConsumerState<HomeView> {
+class _HomeViewState extends ConsumerState<HomeView>
+    with TickerProviderStateMixin {
   final _searchController = TextEditingController();
   String _selectedCategory = 'All';
+
+  // AI Assistant Hint Logic
+  late AnimationController _bubbleController;
+  late Animation<double> _bubbleAnimation;
+  bool _showHint = false;
+  Timer? _hintTimer;
+  final List<String> _hints = [
+    "I'm here to help you!",
+    "Need any recommendations?",
+    "Looking for something specific?",
+    "Check out our new arrivals!",
+  ];
+  int _currentHintIndex = 0;
+
+  // FAB Floating Animation
+  late AnimationController _floatController;
+  late Animation<Offset> _floatAnimation;
 
   @override
   void initState() {
@@ -33,16 +52,60 @@ class _HomeViewState extends ConsumerState<HomeView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(notificationServiceProvider).init(context);
-        // Ensure products are loaded initially for the "All" category
-        ref.read(productListViewModelProvider.notifier).loadProducts();
       }
     });
 
+    // Setup AI Bubble Animation
+    _bubbleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _bubbleAnimation = CurvedAnimation(
+      parent: _bubbleController,
+      curve: Curves.elasticOut,
+    );
+
+    // Start timer to show hints occasionally
+    _startHintCycle();
+
+    // Setup FAB Floating Animation
+    _floatController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _floatAnimation =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(0, -0.1)).animate(
+          CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
+        );
+  }
+
+  void _startHintCycle() {
+    _hintTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
+      if (!mounted) return;
+      setState(() {
+        _showHint = true;
+        _currentHintIndex = (_currentHintIndex + 1) % _hints.length;
+      });
+      _bubbleController.forward();
+
+      // Hide after 5 seconds
+      Future.delayed(const Duration(seconds: 5), () {
+        if (mounted) {
+          _bubbleController.reverse().then((_) {
+            if (mounted) setState(() => _showHint = false);
+          });
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _bubbleController.dispose();
+    _floatController.dispose();
+    _hintTimer?.cancel();
     super.dispose();
   }
 
@@ -73,39 +136,56 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
                     child: Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.location_on_outlined,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              profileState.when(
-                                data: (profile) =>
-                                    profile?.address ?? 'Set Location',
-                                loading: () => 'Loading...',
-                                error: (_, __) => 'Kochi, Kerala',
-                              ),
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                        InkWell(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const EditProfileView(),
                             ),
-                            Text(
-                              'Your Location',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.grey,
-                              ),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.location_on_outlined,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      profileState.when(
+                                        data: (profile) =>
+                                            profile?.address ?? 'Set Location',
+                                        loading: () => 'Loading...',
+                                        error: (_, __) => 'Unavailable',
+                                      ),
+                                      style: theme.textTheme.titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                    ),
+                                    Text(
+                                      'Your Location',
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                         const Spacer(),
                         InkWell(
@@ -274,7 +354,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               ...categories.map(
                                 (c) => _buildCategoryChip(
                                   c.name,
-                                  c.id,
+                                  c.type,
                                   _selectedCategory == c.name,
                                 ),
                               ),
@@ -329,15 +409,63 @@ class _HomeViewState extends ConsumerState<HomeView> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AiChatView()),
-          );
-        },
-        backgroundColor: AppColors.primaryBlack,
-        child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
+      floatingActionButton: SlideTransition(
+        position: _floatAnimation,
+        child: Stack(
+          alignment: Alignment.bottomRight,
+          clipBehavior: Clip.none,
+          children: [
+            if (_showHint)
+              Positioned(
+                bottom: 70,
+                right: 0,
+                child: ScaleTransition(
+                  scale: _bubbleAnimation,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    constraints: const BoxConstraints(maxWidth: 180),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryBlack,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                        bottomLeft: Radius.circular(20),
+                        bottomRight: Radius.circular(4),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      _hints[_currentHintIndex],
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AiChatView()),
+                );
+              },
+              backgroundColor: AppColors.primaryBlack,
+              child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -423,30 +551,20 @@ class _HomeViewState extends ConsumerState<HomeView> {
               ),
             ),
 
-            // Badges
-            Positioned(
-              top: 12,
-              left: 12,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: Colors.white, size: 12),
-              ),
-            ),
-
             // Wishlist Heart Icon
             Positioned(
               top: 12,
-              left: 48, // Adjusted to be next to the check badge
+              left: 12,
               child: Consumer(
                 builder: (context, ref, _) {
-                  final isWishlisted = ref.watch(wishlistProvider).contains(product.id);
+                  final isWishlisted = ref
+                      .watch(wishlistProvider)
+                      .contains(product.id);
                   return GestureDetector(
                     onTap: () {
-                      ref.read(wishlistProvider.notifier).toggleWishlist(product.id);
+                      ref
+                          .read(wishlistProvider.notifier)
+                          .toggleWishlist(product.id);
                     },
                     child: Container(
                       padding: const EdgeInsets.all(4),
@@ -471,7 +589,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 },
               ),
             ),
-
 
             Positioned(
               top: 12,

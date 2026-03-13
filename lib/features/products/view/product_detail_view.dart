@@ -8,6 +8,7 @@ import '../../cart/viewmodel/cart_viewmodel.dart';
 import '../viewmodel/product_detail_viewmodel.dart';
 import '../../profile/viewmodel/wishlist_viewmodel.dart';
 import '../../../core/utils/responsive.dart';
+import '../../../core/constants/app_colors.dart';
 
 
 class ProductDetailView extends ConsumerStatefulWidget {
@@ -179,15 +180,16 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
     return Stack(
       children: [
         Container(
-          height: 500,
+          height: 350, // Reduced from 500 for better mobile fit
           width: double.infinity,
           decoration: BoxDecoration(
+            color: Colors.white, // White background for contained images
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
               ),
             ],
           ),
@@ -202,7 +204,7 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
               itemBuilder: (context, index) {
                 return Image.network(
                   product.images[index],
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain, // Changed from cover to show full image
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Container(
@@ -241,13 +243,13 @@ class _ProductDetailViewState extends ConsumerState<ProductDetailView> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
                   color: index == _currentPage
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.4),
+                      ? AppColors.primaryBlack
+                      : Colors.grey.shade300,
                   boxShadow: [
                     if (index == _currentPage)
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 10,
+                        color: AppColors.primaryBlack.withValues(alpha: 0.1),
+                        blurRadius: 4,
                       ),
                   ],
                 ),

@@ -4,6 +4,8 @@ import 'package:vaari/features/navigation/main_navigation_view.dart';
 import '../viewmodel/auth_viewmodel.dart';
 import 'signup_view.dart';
 import 'forgot_password_view.dart';
+import '../../../core/utils/validation_utils.dart';
+import '../../../core/utils/toast_utils.dart';
 
 class LoginView extends ConsumerStatefulWidget {
   const LoginView({super.key});
@@ -47,16 +49,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
           }
         },
         error: (e, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString()),
-              backgroundColor: Theme.of(context).colorScheme.error,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          );
+          ToastUtils.showError(context, e.toString());
         },
       );
     });
@@ -131,11 +124,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                 hintText: 'Enter email',
                                 prefixIcon: null, // As in image
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty)
-                                  return 'Email is required';
-                                return null;
-                              },
+                              validator: ValidationUtils.validateEmail,
                             ),
                             const SizedBox(height: 16),
                             TextFormField(
@@ -160,11 +149,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                 ),
                               ),
 
-                              validator: (value) {
-                                if (value == null || value.isEmpty)
-                                  return 'Password is required';
-                                return null;
-                              },
+                              validator: ValidationUtils.validatePassword,
                             ),
                             const SizedBox(height: 16),
                             Row(

@@ -50,7 +50,7 @@ class ProductListViewModel
 
       // Apply Filters
       if (_categoryId != null && _categoryId != 'all') {
-        query = query.eq('category_id', _categoryId!);
+        query = query.eq('type', _categoryId!);
       }
 
       if (_searchQuery != null && _searchQuery!.isNotEmpty) {

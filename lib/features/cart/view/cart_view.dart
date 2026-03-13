@@ -114,17 +114,22 @@ class CartView extends ConsumerWidget {
               color: colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
-          const SizedBox(height: 24, width: 24),
-          ElevatedButton(
-            onPressed: () {
-              // Navigate to Home tab (index 0)
-              ref.read(navigationIndexProvider.notifier).state = 0;
-            },
-
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 22),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: 200, // Restricted button size
+            child: ElevatedButton(
+              onPressed: () {
+                // Navigate to Home tab
+                ref.read(navigationIndexProvider.notifier).state = 0;
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('Start Shopping'),
             ),
-            child: const Text('START SHOPPING'),
           ),
         ],
       ),

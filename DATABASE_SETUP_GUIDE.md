@@ -14,9 +14,11 @@ The admin panel is getting a `PostgrestException: new row violates row-level sec
 
 Run these SQL commands in the Supabase SQL Editor:
 
-```sql
 -- Enable RLS on products table (if not already enabled)
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+
+-- Add image_urls column for multi-image support (Run this if adding products fails)
+ALTER TABLE products ADD COLUMN IF NOT EXISTS image_urls jsonb DEFAULT '[]'::jsonb;
 
 -- Policy: Allow all authenticated users to SELECT products
 CREATE POLICY "Allow public to read products"

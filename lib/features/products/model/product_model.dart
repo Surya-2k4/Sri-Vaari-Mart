@@ -24,14 +24,15 @@ class ProductModel {
         data['image_url'] ??
         'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000&auto=format&fit=crop';
 
-    // Build slideshow images from the 'images' column (text[] array in DB).
+    // Build slideshow images from the 'image_urls' column (jsonb array in DB).
     // Falls back to main image if the column is missing or empty.
     List<String> imagesList = [];
 
-    if (data['images'] != null &&
-        data['images'] is List &&
-        (data['images'] as List).isNotEmpty) {
-      imagesList = (data['images'] as List).map((e) => e.toString()).toList();
+    if (data['image_urls'] != null &&
+        data['image_urls'] is List &&
+        (data['image_urls'] as List).isNotEmpty) {
+      imagesList =
+          (data['image_urls'] as List).map((e) => e.toString()).toList();
     }
 
     // If no images array from DB, use the main image for the slideshow

@@ -2,19 +2,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../auth/viewmodel/auth_viewmodel.dart';
 import '../../products/model/product_model.dart';
 
-final wishlistProvider = StateNotifierProvider<WishlistViewModel, List<String>>((ref) {
-  return WishlistViewModel();
+final wishlistProvider =
+    StateNotifierProvider<WishlistViewModel, List<String>>((ref) {
+  final user = ref.watch(authViewModelProvider).value;
+  return WishlistViewModel(user?.id);
 });
 
 class WishlistViewModel extends StateNotifier<List<String>> {
-  WishlistViewModel() : super([]) {
+  final String? userId;
+  WishlistViewModel(this.userId) : super([]) {
     _loadWishlist();
   }
 
-  static const _wishlistKey = 'user_wishlist';
-
+  String get _wishlistKey =>
+      userId != null ? 'user_wishlist_$userId' : 'user_wishlist_guest';
 
   Future<void> _loadWishlist() async {
     final prefs = await SharedPreferences.getInstance();

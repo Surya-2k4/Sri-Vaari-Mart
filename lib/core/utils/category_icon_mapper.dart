@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 
 IconData getCategoryIcon(String icon) {
-  switch (icon) {
+  switch (icon.toLowerCase()) {
     case 'sofa':
-      return Icons.weekend;
+    case 'furniture':
+    case 'chair':
+      return Icons.chair;
     case 'bed':
       return Icons.bed;
     case 'dining':
       return Icons.table_bar;
     case 'mobile':
-      return Icons.smartphone;
+    case 'smartphone':
+    case 'devices':
+      return Icons.devices;
     case 'laptop':
       return Icons.laptop_mac;
     case 'appliance':
-      return Icons.kitchen;
+    case 'home_max':
+      return Icons.home_max;
     default:
       return Icons.category;
   }

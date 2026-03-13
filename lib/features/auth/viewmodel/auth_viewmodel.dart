@@ -25,12 +25,13 @@ class AuthViewModel extends StateNotifier<AsyncValue<AppUser?>> {
     }
   }
 
-  Future<void> signUp(String email, String password) async {
+  Future<void> signUp(String email, String password, String fullName) async {
     try {
       state = const AsyncValue.loading();
       final response = await _client.auth.signUp(
         email: email,
         password: password,
+        data: {'full_name': fullName},
       );
 
       final user = response.user!;

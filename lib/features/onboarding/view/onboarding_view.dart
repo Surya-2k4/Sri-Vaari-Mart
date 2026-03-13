@@ -1,195 +1,224 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vaari/features/auth/view/login_view.dart';
-import 'package:vaari/features/auth/view/signup_view.dart';
-import 'package:vaari/core/constants/app_colors.dart';
-import '../../../core/utils/responsive.dart';
+import '../viewmodel/onboarding_viewmodel.dart';
+import '../../navigation/main_navigation_view.dart';
+import '../../../core/constants/app_colors.dart';
+import 'dart:convert';
 
-class OnboardingView extends ConsumerWidget {
+class OnboardingView extends ConsumerStatefulWidget {
   const OnboardingView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
+  ConsumerState<OnboardingView> createState() => _OnboardingViewState();
+}
+
+class _OnboardingViewState extends ConsumerState<OnboardingView> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onPageChanged(int page) {
+    setState(() {
+      _currentPage = page;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = ref.watch(onboardingViewModelProvider.notifier);
+    final pages = viewModel.pages;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Responsive(
-              mobile: _buildMobileLayout(context),
-              desktop: _buildDesktopLayout(context, theme, size),
-            ),
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            itemCount: pages.length,
+            itemBuilder: (context, index) {
+              final page = pages[index];
+              return _buildPage(page);
+            },
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMobileLayout(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40.0),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight:
-                MediaQuery.of(context).size.height -
-                MediaQuery.of(context).padding.top -
-                MediaQuery.of(context).padding.bottom,
-          ),
-          child: IntrinsicHeight(
+          Positioned(
+            bottom: 60,
+            left: 0,
+            right: 0,
             child: Column(
               children: [
-                const SizedBox(height: 60),
-                _buildHeader(),
-                const Spacer(),
-                _buildIllustration(250),
-                const Spacer(),
-                _buildButtons(context),
-                const SizedBox(height: 40),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    pages.length,
+                    (index) => _buildDot(index),
+                  ),
+                ),
+                const SizedBox(height: 48),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (_currentPage < pages.length - 1)
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MainNavigationView(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'SKIP',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        )
+                      else
+                        const SizedBox(width: 60),
+                      GestureDetector(
+                        onTap: () {
+                          if (_currentPage < pages.length - 1) {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          } else {
+                            ref.read(onboardingViewModelProvider.notifier).completeOnboarding();
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MainNavigationView(),
+                              ),
+                            );
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryBlack,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primaryBlack.withOpacity(0.2),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            _currentPage == pages.length - 1 ? 'FINISH' : 'NEXT',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildDesktopLayout(BuildContext context, ThemeData theme, Size size) {
-    return Row(
-      children: [
-        // Left side: Illustration
-        Expanded(
-          flex: 5,
-          child: Container(
-            color: AppColors.primaryBlack.withValues(alpha: 0.02),
-            child: Center(child: _buildIllustration(400)),
-          ),
-        ),
-        // Right side: Content
-        Expanded(
-          flex: 4,
-          child: Padding(
-            padding: const EdgeInsets.all(60.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Welcome =)',
-                  style: TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Hi there!\nWe\'re here to help you get your daily essentials.\nThe choice is yours: Log in or create an account.',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey,
-                    height: 1.6,
-                  ),
-                ),
-                const SizedBox(height: 60),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: _buildButtons(context),
-                ),
-              ],
+  Widget _buildPage(page) {
+    return Padding(
+      padding: const EdgeInsets.all(40.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            height: 300,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(32),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: _buildImage(page.imageAsset),
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        const Text(
-          'Welcome =)',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.w900,
-            color: Colors.black,
+          const SizedBox(height: 60),
+          Text(
+            page.title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: Colors.black,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        const Text(
-          'Hi there!\nWe\'re here to help you get your daily essentials.\nThe choice is yours: Log in or create an account.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 14, color: Colors.grey, height: 1.6),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildIllustration(double height) {
-    return Image.asset(
-      'assets/images/auth_welcome_illustration.png',
-      height: height,
-      fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) => Icon(
-        Icons.shopping_bag_outlined,
-        size: height * 0.6,
-        color: Colors.black12,
+          const SizedBox(height: 24),
+          Text(
+            page.description,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+              height: 1.6,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildButtons(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SignupView()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryBlack,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text('Create Account'),
-          ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: OutlinedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginView()),
-              );
-            },
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.black12),
-              foregroundColor: Colors.black,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text('Log In'),
-          ),
-        ),
-      ],
+  Widget _buildImage(String imageAsset) {
+    if (imageAsset.startsWith('data:image')) {
+      // Handle base64
+      try {
+        final base64String = imageAsset.split(',').last;
+        return Image.memory(
+          base64Decode(base64String),
+          fit: BoxFit.cover,
+        );
+      } catch (e) {
+        return const Icon(Icons.image_outlined, size: 100, color: Colors.grey);
+      }
+    } else if (imageAsset.startsWith('http')) {
+      return Image.network(
+        imageAsset,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(Icons.image_outlined, size: 100, color: Colors.grey),
+      );
+    } else {
+      return Image.asset(
+        imageAsset,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(Icons.image_outlined, size: 100, color: Colors.grey),
+      );
+    }
+  }
+
+  Widget _buildDot(int index) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      margin: const EdgeInsets.only(right: 8),
+      height: 8,
+      width: _currentPage == index ? 24 : 8,
+      decoration: BoxDecoration(
+        color: _currentPage == index ? AppColors.primaryBlack : Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(4),
+      ),
     );
   }
 }

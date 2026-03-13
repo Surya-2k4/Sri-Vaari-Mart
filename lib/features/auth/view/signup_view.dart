@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vaari/features/onboarding/view/onboarding_view.dart';
 import '../viewmodel/auth_viewmodel.dart';
 import 'forgot_password_view.dart';
+import '../../../core/utils/validation_utils.dart';
+import '../../../core/utils/toast_utils.dart';
 
 class SignupView extends ConsumerStatefulWidget {
   const SignupView({super.key});
@@ -46,17 +49,17 @@ class _SignupViewState extends ConsumerState<SignupView> {
 
     ref.listen(authViewModelProvider, (previous, next) {
       next.whenOrNull(
+        data: (user) {
+          if (user != null) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const OnboardingView()),
+              (route) => false,
+            );
+          }
+        },
         error: (e, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString()),
-              backgroundColor: theme.colorScheme.error,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          );
+          ToastUtils.showError(context, e.toString());
         },
       );
     });
@@ -139,11 +142,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                               decoration: const InputDecoration(
                                 hintText: 'Enter email',
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty)
-                                  return 'Email is required';
-                                return null;
-                              },
+                              validator: ValidationUtils.validateEmail,
                             ),
                             const SizedBox(height: 16),
                             TextFormField(
@@ -167,15 +166,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                                   },
                                 ),
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Password is required';
-                                }
-                                if (value.length < 6) {
-                                  return 'Password must be at least 6 characters';
-                                }
-                                return null;
-                              },
+                              validator: ValidationUtils.validatePassword,
                             ),
                             const SizedBox(height: 16),
                             TextFormField(
@@ -246,6 +237,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                                             .signUp(
                                               _emailController.text.trim(),
                                               _passwordController.text.trim(),
+                                              _nameController.text.trim(),
                                             );
                                       }
                                     },

@@ -1,11 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../auth/viewmodel/auth_viewmodel.dart';
 import '../model/profile_model.dart';
 
 final profileViewModelProvider =
     StateNotifierProvider<ProfileViewModel, AsyncValue<ProfileModel?>>(
-      (ref) => ProfileViewModel(),
+      (ref) {
+        // Watch auth state to rebuild this provider when user logs in/out
+        ref.watch(authViewModelProvider);
+        return ProfileViewModel();
+      },
     );
 
 class ProfileViewModel extends StateNotifier<AsyncValue<ProfileModel?>> {
@@ -45,7 +50,13 @@ class ProfileViewModel extends StateNotifier<AsyncValue<ProfileModel?>> {
   }
 
   Future<void> _createProfile(User user) async {
-    await _client.from('profiles').insert({'id': user.id, 'email': user.email});
+    final String? fullName = user.userMetadata?['full_name'];
+
+    await _client.from('profiles').insert({
+      'id': user.id,
+      'email': user.email,
+      'full_name': fullName,
+    });
 
     await loadProfile();
   }
