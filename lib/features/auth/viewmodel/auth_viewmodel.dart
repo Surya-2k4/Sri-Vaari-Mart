@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 import '../model/user_model.dart';
 
 final authViewModelProvider =
@@ -84,10 +85,12 @@ class AuthViewModel extends StateNotifier<AsyncValue<AppUser?>> {
   Future<void> signInWithGoogle() async {
     try {
       state = const AsyncValue.loading();
+      final redirectTo = kIsWeb 
+          ? 'http://localhost:49435' 
+          : 'vaari://login-callback';
       await _client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo:
-            'http://localhost:49435', // Update this for your production URL
+        redirectTo: redirectTo,
       );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -97,7 +100,24 @@ class AuthViewModel extends StateNotifier<AsyncValue<AppUser?>> {
   Future<void> resetPassword(String email) async {
     try {
       state = const AsyncValue.loading();
-      await _client.auth.resetPasswordForEmail(email);
+      final redirectTo = kIsWeb 
+          ? 'http://localhost:49435/reset-password' 
+          : 'vaari://reset-password';
+      
+      await _client.auth.resetPasswordForEmail(
+        email,
+        redirectTo: redirectTo,
+      );
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      state = const AsyncValue.loading();
+      await _client.auth.updateUser(UserAttributes(password: newPassword));
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
