@@ -99,7 +99,7 @@ class ReceiptGeneratorService {
                       pw.Text(
                         DateFormat(
                           'dd MMM yyyy, hh:mm a',
-                        ).format(order.createdAt),
+                        ).format(order.createdAt.toLocal()),
                         style: pw.TextStyle(
                           fontSize: 14,
                           fontWeight: pw.FontWeight.bold,
@@ -170,8 +170,8 @@ class ReceiptGeneratorService {
                       children: [
                         _buildTableCell(item.productName),
                         _buildTableCell(item.quantity.toString()),
-                        _buildTableCell('₹${item.price.toStringAsFixed(2)}'),
-                        _buildTableCell('₹${subtotal.toStringAsFixed(2)}'),
+                        _buildTableCell('Rs.${item.price.toStringAsFixed(2)}'),
+                        _buildTableCell('Rs.${subtotal.toStringAsFixed(2)}'),
                       ],
                     );
                   }).toList(),
@@ -192,7 +192,7 @@ class ReceiptGeneratorService {
                     ),
                   ),
                   pw.Text(
-                    '₹${totalAmount.toStringAsFixed(2)}',
+                    'Rs.${totalAmount.toStringAsFixed(2)}',
                     style: pw.TextStyle(
                       fontSize: 18,
                       fontWeight: pw.FontWeight.bold,
@@ -245,7 +245,7 @@ class ReceiptGeneratorService {
     await Printing.sharePdf(
       bytes: await pdf.save(),
       filename:
-          'vaari_receipt_${order.id.substring(0, 8)}_${DateFormat('yyyyMMdd').format(order.createdAt)}.pdf',
+          'vaari_receipt_${order.id.substring(0, 8)}_${DateFormat('yyyyMMdd').format(order.createdAt.toLocal())}.pdf',
     );
   }
 
